@@ -8,7 +8,7 @@ import os.path
 # the folder contains an example of generated rsa keys
 # you should generate your own keys
 PUBLIC_KEY_FILE = 'secret_keys/public.key'
-PRIVATE_KEY_FILE = 'secret_keys/private.key.key'
+PRIVATE_KEY_FILE = 'secret_keys/private.key'
 
 args = sys.argv[1:]
 
