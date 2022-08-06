@@ -1,0 +1,102 @@
+#!/opt/homebrew/bin/python3
+# /usr/bin/python3
+
+import rsa
+import sys
+import os.path
+
+# the folder contains an example of generated rsa keys
+# you should generate your own keys
+PUBLIC_KEY_FILE = 'secret_keys/public.key'
+PRIVATE_KEY_FILE = 'secret_keys/private.key.key'
+
+args = sys.argv[1:]
+
+# put True to enable logs
+debug = False
+
+
+def log(message: str):
+    if debug:
+        print(message)
+
+
+def main():
+    try:
+        if len(args) != 3:
+            raise ValueError
+
+        input_file = args[1]
+        output_file = args[2]
+
+        log(f"args length is {len(args)}")
+
+        if not os.path.isfile(input_file):
+            log(f"input file '{input_file}' not founded")
+            raise FileNotFoundError(f"File '{input_file}' not founded")
+
+        log(f"input file is '{input_file}'")
+        log(f"output file is '{output_file}'")
+
+        execute_tasks(input_file, output_file)
+    except AttributeError as e:
+        print(e)
+    except FileNotFoundError as e:
+        print(e)
+    except ValueError:
+        print(f"incorrect input: cryptographer {' '.join(args)}")
+        print(f"correct input: cryptographer [-e|-d] [input file] [output file]")
+
+    log("The End")
+
+
+def execute_tasks(input_file: str, output_file: str):
+    flag = args[0]
+
+    log(f"flag is '{flag}'")
+
+    try:
+        key = init_key()
+        log(f"key received")
+    except AttributeError as e:
+        log(f"outer init_key raise ex")
+        raise e
+
+    with open(input_file, mode='rb') as f:
+        input_file = f.read()
+        log(f"read input file: {input_file}")
+
+    if flag == "-e":
+        content = rsa.encrypt(input_file, key)
+        log(f"content is encrypted: {content}")
+    elif flag == "-d":
+        content = rsa.decrypt(input_file, key)
+        log(f"content is decrypted: {content}")
+    else:
+        log(f"execute_tasks raise ex")
+        raise AttributeError("No such flags")
+
+    with open(output_file, mode='wb') as f:
+        f.write(content)
+        log(f"write out file: {content}")
+
+
+def init_key():
+    flag = args[0]
+
+    if flag == "-e":
+        with open(PUBLIC_KEY_FILE, 'rb') as f:
+            key_file = f.read()
+        return rsa.PublicKey.load_pkcs1(keyfile=key_file)
+    if flag == "-d":
+        with open(PRIVATE_KEY_FILE, 'rb') as f:
+            key_file = f.read()
+        return rsa.PrivateKey.load_pkcs1(keyfile=key_file)
+    else:
+        log(f"inner init_key raise")
+        raise AttributeError("No such flags")
+
+
+if __name__ == '__main__':
+    main()
+
